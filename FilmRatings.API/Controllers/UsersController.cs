@@ -15,43 +15,30 @@ public class UsersController  : ControllerBase
 		_usersService = usersService;
 	}
 	
+	
 	[HttpPost("register")]
 	public async Task<ActionResult> Register([FromBody]RegisterUserRequest request)
 	{
 		
-		try
-		{
-			await _usersService.Register(request.username, request.email, request.password);
+		await _usersService.Register(request.username, request.email, request.password);
 		
-			return Ok();
-		}
-		catch (Exception e)
-		{
-			return BadRequest(e.Message);
-		}
-
+		return Ok();
+			
 	}
 
+	
 	[HttpPost("login")]
 	public async Task<ActionResult<string>> Login([FromBody]LoginUserRequest request)
 	{
 
-		try
-		{
-			var token = await _usersService.Login(request.Email, request.Password);
+		var token = await _usersService.Login(request.Email, request.Password);
 			
-			HttpContext.Response.Cookies.Append("pechenka", token);
+		HttpContext.Response.Cookies.Append("pechenka", token); 
 			
-			return Ok(token);
-		}
-		catch (Exception e)
-		{
-			return BadRequest(e.Message);
-		}
-		
+		return Ok(token);
 		
 	}
 	
-	
-	
+		
+		
 }

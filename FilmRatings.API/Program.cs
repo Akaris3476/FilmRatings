@@ -1,6 +1,7 @@
 using FilmRatings.Application.Services;
 using FilmRatings.Core.Abstractions;
 using FilmRatings.Core.Abstractions.Auth;
+using FilmRatings.Exceptions;
 using FilmRatings.Extensions;
 using FilmRatings.Infrastructure;
 using FilmRatings.Infrastructure.Repositories;
@@ -47,6 +48,8 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandler>();
 
 app.UseHttpsRedirection();
 

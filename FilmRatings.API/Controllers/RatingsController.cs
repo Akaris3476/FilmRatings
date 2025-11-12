@@ -36,20 +36,13 @@ public class RatingsController : ControllerBase
 	[HttpPost]
 	public async Task<ActionResult<Guid>> CreateRating(Guid filmId, [FromBody] RatingsRequest request)
 	{
-		try
-		{
-			var film = await _filmsService.GetFilm(filmId);
-			var rating = new Rating(Guid.NewGuid(), request.Rating, film);
-		
-			var ratingId = await _ratingsService.AddRating(rating);
-		
-			return Ok(ratingId);
-		}
-		catch (ArgumentException e)
-		{
-			return BadRequest(e.Message);
-		}
 
+		var film = await _filmsService.GetFilm(filmId);
+		var rating = new Rating(Guid.NewGuid(), request.Rating, film);
+		
+		var ratingId = await _ratingsService.AddRating(rating);
+		
+		return Ok(ratingId);
 
 	}
 

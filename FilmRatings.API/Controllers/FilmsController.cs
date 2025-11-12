@@ -17,7 +17,7 @@ public class FilmsController : ControllerBase
 		_filmsService = filmsService;
 	}
 	
-	[Authorize]
+	// [Authorize]
 	[HttpGet]
 	public async Task<ActionResult<List<FilmsResponse>>> GetFilms()
 	{
@@ -74,16 +74,11 @@ public class FilmsController : ControllerBase
 	public async Task<ActionResult<Guid>> CreateFilm([FromBody] FilmsRequest request)
 	{
 
-		try
-		{
-			var film = new Film(Guid.NewGuid(), request.Title, request.Description);
-			Guid filmId = await _filmsService.AddFilm(film);
-			return Ok(filmId);
-		}
-		catch (ArgumentException e)
-		{
-			return BadRequest(e.Message);
-		}
+	
+		var film = new Film(Guid.NewGuid(), request.Title, request.Description);
+		Guid filmId = await _filmsService.AddFilm(film);
+		return Ok(filmId);
+			
 
 	}
 
@@ -91,7 +86,9 @@ public class FilmsController : ControllerBase
 	public async Task<ActionResult<Guid>> UpdateFilm(Guid id, [FromBody] FilmsRequest request)
 	{
 		
+		//validation occures on creating film obj
 		var film = new Film(id, request.Title, request.Description);
+		
 		var filmId = await _filmsService.UpdateFilm(id, request.Title, request.Description);
 		return Ok(filmId);
 	}
