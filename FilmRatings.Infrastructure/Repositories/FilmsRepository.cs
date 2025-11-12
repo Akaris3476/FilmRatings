@@ -1,9 +1,9 @@
 using FilmRatings.Core.Abstractions;
 using FilmRatings.Core.Models;
-using FilmRatings.DataAccess.Entities;
+using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace FilmRatings.DataAccess.Repositories;
+namespace FilmRatings.Infrastructure.Repositories;
 
 public class FilmsRepository : IFilmsRepository
 {

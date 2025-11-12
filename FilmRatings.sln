@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.API", "FilmRati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.Core", "FilmRatings.Core\FilmRatings.Core.csproj", "{DC93A865-E32E-4362-972E-2208F93286A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.DataAccess", "FilmRatings.DataAccess\FilmRatings.DataAccess.csproj", "{39FF21A1-DF32-4745-AB25-65764902A29C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.Infrastructure", "FilmRatings.Infrastructure\FilmRatings.Infrastructure.csproj", "{39FF21A1-DF32-4745-AB25-65764902A29C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DC93A865-E32E-4362-972E-2208F93286A0} = {DC93A865-E32E-4362-972E-2208F93286A0}
 	EndProjectSection

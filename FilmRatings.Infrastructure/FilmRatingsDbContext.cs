@@ -1,7 +1,7 @@
-﻿using FilmRatings.DataAccess.Entities;
+﻿using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace FilmRatings.DataAccess;
+namespace FilmRatings.Infrastructure;
 
 public class FilmRatingsDbContext : DbContext
 {
@@ -13,5 +13,7 @@ public class FilmRatingsDbContext : DbContext
 	
 	public DbSet<FilmEntity> Films { get; set; }
 	public DbSet<RatingEntity> Ratings { get; set; }
+	
+	public DbSet<UserEntity> Users { get; set; }
 	
 }

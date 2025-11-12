@@ -6,6 +6,12 @@ public class Rating
 	public int Value { get; private set; }
 	public Film Film { get; private set; }
 	public Guid FilmId { get; private set; }
+	
+	// public User User { get; private set; }
+	//
+	// public Guid UserId { get; private set; }
+	
+	// TODO: add user owner
 
 	public Rating(Guid id, int value, Film film)
 	{

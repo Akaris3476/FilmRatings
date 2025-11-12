@@ -1,6 +1,7 @@
 using FilmRatings.Contracts;
 using FilmRatings.Core.Abstractions;
 using FilmRatings.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilmRatings.Controllers;
@@ -16,6 +17,7 @@ public class FilmsController : ControllerBase
 		_filmsService = filmsService;
 	}
 	
+	[Authorize]
 	[HttpGet]
 	public async Task<ActionResult<List<FilmsResponse>>> GetFilms()
 	{

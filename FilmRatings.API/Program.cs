@@ -1,7 +1,9 @@
 using FilmRatings.Application.Services;
 using FilmRatings.Core.Abstractions;
-using FilmRatings.DataAccess;
-using FilmRatings.DataAccess.Repositories;
+using FilmRatings.Core.Abstractions.Auth;
+using FilmRatings.Extensions;
+using FilmRatings.Infrastructure;
+using FilmRatings.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,16 +17,27 @@ builder.Services.AddDbContext<FilmRatingsDbContext>(options =>
 	options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(FilmRatingsDbContext)))
 );
 
-builder.Services.AddTransient<IFilmsRepository, FilmsRepository>();
+
+builder.Services.Configure<JwtOptions>(
+	builder.Configuration.GetSection(nameof(JwtOptions)));
+
+
+
+builder.Services.AddScoped<IFilmsRepository, FilmsRepository>();
 builder.Services.AddTransient<IFilmsService, FilmsService>();
 
-builder.Services.AddTransient<IRatingsRepository, RatingsRepository>();
+builder.Services.AddScoped<IRatingsRepository, RatingsRepository>();
 builder.Services.AddTransient<IRatingsService, RatingsService>();
 
-// FilmRatingsDbContext dbContext = builder.Services.BuildServiceProvider().GetRequiredService<FilmRatingsDbContext>();
-// if (!dbContext.Database.CanConnect()){
-// 	Console.WriteLine("--- no db :( ---");
-// }
+builder.Services.AddScoped<IUsersRepository,UsersRepository>();
+builder.Services.AddTransient<IUsersService, UsersService>();
+
+builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
+
+
+builder.Services.AddApiAuthentication(builder.Configuration);
+
 
 var app = builder.Build();
 
@@ -36,6 +49,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 
 app.MapControllers();
