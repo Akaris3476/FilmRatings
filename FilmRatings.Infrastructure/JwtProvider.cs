@@ -18,9 +18,14 @@ public class JwtProvider : IJwtProvider
 		_options = options.Value;
 	}
 	
-	public string GenerateToken(Guid userId)
+	public string GenerateToken(Guid userId, bool isAdmin)
 	{
-		Claim[] claims = [new("userId", userId.ToString())];
+		
+		Claim[] claims = 
+		[
+			new("userId", userId.ToString()),
+			new("Admin", isAdmin.ToString())
+		];
 		
 		var signingCredentials = new SigningCredentials(
 			new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),

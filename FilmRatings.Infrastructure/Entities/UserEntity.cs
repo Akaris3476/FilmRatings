@@ -11,6 +11,8 @@ public class UserEntity
 	
 	public string HashedPassword { get; set; } = string.Empty;
 	
+	public bool IsAdmin { get; set; }
+	
 	public ICollection<RatingEntity> Ratings { get; set; } = new List<RatingEntity>();
 	
 	

@@ -17,7 +17,6 @@ public class FilmsController : ControllerBase
 		_filmsService = filmsService;
 	}
 	
-	// [Authorize]
 	[HttpGet]
 	public async Task<ActionResult<List<FilmsResponse>>> GetFilms()
 	{
@@ -69,7 +68,8 @@ public class FilmsController : ControllerBase
 		
 		return Ok(response);
 	}
-
+	
+	[Authorize(Policy="AdminPolicy")]
 	[HttpPost]
 	public async Task<ActionResult<Guid>> CreateFilm([FromBody] FilmsRequest request)
 	{
@@ -82,6 +82,7 @@ public class FilmsController : ControllerBase
 
 	}
 
+	[Authorize(Policy="AdminPolicy")]
 	[HttpPut("{id:guid}")]
 	public async Task<ActionResult<Guid>> UpdateFilm(Guid id, [FromBody] FilmsRequest request)
 	{
@@ -93,6 +94,7 @@ public class FilmsController : ControllerBase
 		return Ok(filmId);
 	}
 	
+	[Authorize(Policy="AdminPolicy")]
 	[HttpDelete("{id:guid}")]
 	public async Task<ActionResult<Guid>> DeleteFilm(Guid id)
 	{

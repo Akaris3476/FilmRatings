@@ -21,7 +21,8 @@ public class UsersRepository : IUsersRepository
 			Email = user.Email,
 			Username = user.Username,
 			HashedPassword = user.HashedPassword,
-			Id = user.Id
+			Id = user.Id,
+			IsAdmin = user.IsAdmin
 		};
 		
 		await _dbContext.Users.AddAsync(userEntity);
@@ -42,7 +43,7 @@ public class UsersRepository : IUsersRepository
 			throw new KeyNotFoundException($"User with email {email} not found");
 
 		var user = new User(userEntity.Id, userEntity.Email,
-			userEntity.Username, userEntity.HashedPassword);
+			userEntity.Username, userEntity.HashedPassword, userEntity.IsAdmin);
 		
 		
 		return user;

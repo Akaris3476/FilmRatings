@@ -66,5 +66,7 @@ public class RatingsController : ControllerBase
 		return Ok(ratingId);
 		
 	}
+	
+	// TODO: update only user's own ratings unless you're admin
 		
 }

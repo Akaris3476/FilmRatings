@@ -43,8 +43,10 @@ public class UsersService : IUsersService
 		if (!result)
 			throw new ArgumentException("Invalid password");
 		
-		var token = _jwtProvider.GenerateToken(user.Id);
+		var token = _jwtProvider.GenerateToken(user.Id, user.IsAdmin);
 		
 		return token;
 	}
+	
+	// TODO: GiveAdminRights();
 }
