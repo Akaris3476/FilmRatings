@@ -22,6 +22,11 @@ builder.Services.AddDbContext<FilmRatingsDbContext>(options =>
 builder.Services.Configure<JwtOptions>(
 	builder.Configuration.GetSection(nameof(JwtOptions)));
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+	options.Configuration = builder.Configuration.GetConnectionString("Redis");
+	options.InstanceName = "FilmsCache";
+});
 
 
 builder.Services.AddScoped<IFilmsRepository, FilmsRepository>();
