@@ -32,7 +32,7 @@ public class Film
 		Title = title;
 	}
 
-	public void SetDescription(string description)
+	public void SetDescription(string? description)
 	{
 		if (string.IsNullOrWhiteSpace(description))
 			throw new ArgumentException("Description cannot be null or whitespace", nameof(description));
@@ -63,16 +63,13 @@ public class Film
 	}
 
 	public float AverageRating()
-	{
-		if (_ratings.Count == 0)
-			return 0;
-
-		var averageRating = _ratings.Average(r => r.Value);
-		
-		return (float)Math.Round(averageRating,2);
-	}
+		=> _computeAverageRating(_ratings);
 	
-	public static float AverageRating(List<Rating> ratings)
+	public static float AverageRating(List<Rating> ratings) 
+		=> _computeAverageRating(ratings);
+	
+
+	private static float _computeAverageRating(List<Rating> ratings)
 	{
 		if (ratings.Count == 0)
 			return 0;
@@ -81,7 +78,6 @@ public class Film
 		
 		return (float)Math.Round(averageRating,2);
 	}
-
 
 
 }

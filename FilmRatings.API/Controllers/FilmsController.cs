@@ -87,7 +87,7 @@ public class FilmsController : ControllerBase
 	public async Task<ActionResult<Guid>> UpdateFilm(Guid id, [FromBody] FilmsRequest request)
 	{
 		
-		//validation occures on creating film obj
+		//validation occurs on creating film obj
 		var film = new Film(id, request.Title, request.Description);
 		
 		var filmId = await _filmsService.UpdateFilm(id, request.Title, request.Description);
