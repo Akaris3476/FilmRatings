@@ -1,4 +1,4 @@
-namespace FilmRatings.Contracts;
+namespace FilmRatings.Contracts.Ratings;
 
 public record RatingsResponse(
 	Guid Id,

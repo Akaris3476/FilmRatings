@@ -1,4 +1,4 @@
-namespace FilmRatings.Contracts;
+namespace FilmRatings.Contracts.Films;
 
 public record FilmsRequest(
 	string Title, 

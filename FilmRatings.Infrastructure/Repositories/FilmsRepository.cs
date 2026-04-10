@@ -1,4 +1,4 @@
-using FilmRatings.Core.Abstractions;
+using FilmRatings.Core.Abstractions.Repositories;
 using FilmRatings.Core.Models;
 using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -17,30 +17,93 @@ public class FilmsRepository : IFilmsRepository
 		_dbContext = dbContext;
 		_distributedCache = distributedCache;
 	}
-
-
-	public async Task<List<Film>> GetAll()
+	
+	
+	// public async Task<List<Film>> GetAll()
+	// {
+	// 			
+	// 	string key = "all-films";
+	// 	
+	// 	string? cachedFilm = await _distributedCache.GetStringAsync(key);
+	//
+	// 	if (!string.IsNullOrEmpty(cachedFilm))
+	// 	{
+	// 		var cacheFilms = JsonConvert.DeserializeObject<List<Film>>(cachedFilm);
+	// 		
+	// 		if (cacheFilms is not null) 
+	// 			return cacheFilms;
+	// 	}
+	//
+	//
+	// 	List<FilmEntity> filmEntities = await _dbContext.Films
+	// 		.AsNoTracking()
+	// 		.ToListAsync();
+	// 	
+	// 	List<Film> films =  filmEntities
+	// 		.Select(filmEntity => new Film(filmEntity.Id, filmEntity.Title, filmEntity.Description))
+	// 		.ToList();
+	// 	
+	// 	await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(films));
+	//
+	// 	return films;
+	// }
+	
+	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions) 
 	{
-				
-		string key = "all-films";
+		string key = $"all-films-include-{(int)includeOptions}";
 		
-		string? cachedFilm = await _distributedCache.GetStringAsync(key);
-
-		if (!string.IsNullOrEmpty(cachedFilm))
+		string? cachedFilms = await _distributedCache.GetStringAsync(key);
+		
+		if (!string.IsNullOrEmpty(cachedFilms))
 		{
-			var cacheFilms = JsonConvert.DeserializeObject<List<Film>>(cachedFilm);
+			var cacheFilms = JsonConvert.DeserializeObject<List<Film>>(cachedFilms);
 			
 			if (cacheFilms is not null) 
 				return cacheFilms;
 		}
-
-
-		List<FilmEntity> filmEntities = await _dbContext.Films
-			.AsNoTracking()
-			.ToListAsync();
 		
-		List<Film> films =  filmEntities
-			.Select(filmEntity => new Film(filmEntity.Id, filmEntity.Title, filmEntity.Description))
+		IQueryable<FilmEntity> filmEntities = _dbContext.Films
+			.AsNoTracking();
+		
+		FilmsIncludeOptions[] possibleOptions = Enum.GetValues<FilmsIncludeOptions>();
+		
+		foreach (var option in possibleOptions)
+		{
+			if (option == FilmsIncludeOptions.None || !includeOptions.HasFlag(option)) 
+				continue;
+			
+			filmEntities = option switch
+			{
+				FilmsIncludeOptions.Ratings => filmEntities.Include(f => f.Ratings),
+				_ => filmEntities
+			};
+		}
+
+		List<FilmEntity> list = await filmEntities.ToListAsync();
+		
+		var rawList = list
+			.Select(f => new 
+			{
+				f.Id,
+				f.Title,
+				f.Description,
+				Ratings = f.Ratings.Select(r => new { r.Id, r.Value }).ToList()
+			});
+		
+		
+		List<Film> films =  rawList
+			.Select(entity =>
+			{
+				var film = new Film(entity.Id, entity.Title, entity.Description);
+
+				var ratings = entity.Ratings
+					.Select(r => new Rating(r.Id, r.Value, film.Id));
+				
+				film.SetRatingList(ratings);
+
+				return film;
+
+			})
 			.ToList();
 		
 		await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(films));
@@ -79,6 +142,11 @@ public class FilmsRepository : IFilmsRepository
 		
 		return film;
 
+	}
+
+	public async Task<List<Film>> GetAll()
+	{
+		throw new NotImplementedException();
 	}
 
 	public async Task<Guid> Create(Film film)

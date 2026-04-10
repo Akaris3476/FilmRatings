@@ -1,5 +1,6 @@
 using FilmRatings.Contracts;
-using FilmRatings.Core.Abstractions;
+using FilmRatings.Contracts.Ratings;
+using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,8 +38,7 @@ public class RatingsController : ControllerBase
 	public async Task<ActionResult<Guid>> CreateRating(Guid filmId, [FromBody] RatingsRequest request)
 	{
 
-		var film = await _filmsService.GetFilm(filmId);
-		var rating = new Rating(Guid.NewGuid(), request.Rating, film);
+		var rating = new Rating(Guid.NewGuid(), request.Rating, filmId);
 		
 		var ratingId = await _ratingsService.AddRating(rating);
 		
@@ -49,8 +49,7 @@ public class RatingsController : ControllerBase
 	[HttpPut("{ratingId:guid}")]
 	public async Task<ActionResult<Guid>> UpdateRating(Guid filmId, Guid ratingId, [FromBody] RatingsRequest request)
 	{
-		var film = await _filmsService.GetFilm(filmId);
-		var rating = new Rating(ratingId, request.Rating, film );
+		var rating = new Rating(ratingId, request.Rating, filmId);
 		
 		ratingId = await _ratingsService.UpdateRating(rating);
 		

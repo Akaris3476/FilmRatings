@@ -1,4 +1,4 @@
-using FilmRatings.Core.Abstractions;
+using FilmRatings.Core.Abstractions.Repositories;
 using FilmRatings.Core.Models;
 using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;

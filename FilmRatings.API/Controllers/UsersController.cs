@@ -1,5 +1,5 @@
-using FilmRatings.Application.Services;
-using FilmRatings.Contracts;
+using FilmRatings.Contracts.Auth;
+using FilmRatings.Core.Abstractions.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilmRatings.Controllers;

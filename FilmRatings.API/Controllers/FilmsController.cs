@@ -1,5 +1,6 @@
-using FilmRatings.Contracts;
-using FilmRatings.Core.Abstractions;
+using FilmRatings.Contracts.Films;
+using FilmRatings.Contracts.Ratings;
+using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FilmRatings.Controllers;
 
 [ApiController]
-[Route("/[controller]")]
+[Route("/films")]
 public class FilmsController : ControllerBase
 {
 	private readonly IFilmsService _filmsService;
@@ -18,32 +19,22 @@ public class FilmsController : ControllerBase
 	}
 	
 	[HttpGet]
-	public async Task<ActionResult<List<FilmsResponse>>> GetFilms()
+	public async Task<ActionResult<List<FilmsResponse>>> GetFilms([FromQuery] string include = "")
 	{
-		var films = await _filmsService.GetAllFilms();
-
-		var response = films.Select(f => new FilmsResponse(f.Id, f.Title, f.Description));
+		List<Film> films;
+		
+		films = await _filmsService.GetAllFilms( include);
+		
+		var response = films.Select(f => new FilmsResponse(
+				f.Id, f.Title, f.Description, f.AverageRating(),
+				f.Ratings.Select(r => new RatingsResponse(r.Id, r.Value))
+					.ToList()
+			)
+		);
 		
 		return Ok(response);
 	}
 	
-	[HttpGet("all")]
-	public async Task<ActionResult<List<FilmWithRatingsResponse>>> GetFilmsWithRatings( IRatingsService ratingsService)
-	{
-		var films = await _filmsService.GetAllFilms();
-
-		films = await _filmsService.AddRatingsToFilms(films, ratingsService);
-
-		var responses = films
-			.Select(f => new FilmWithRatingsResponse(
-				f.Id, f.Title, f.Description, f.AverageRating(),
-				f.Ratings.Select(r => new RatingsResponse(r.Id, r.Value))
-					.ToList()
-				)
-			);
-		
-		return Ok(responses);
-	}
 
 	
 	[HttpGet("{filmId}")]
@@ -58,13 +49,13 @@ public class FilmsController : ControllerBase
 	}
 	
 	[HttpGet("all/{filmId}")]
-	public async Task<ActionResult<FilmWithRatingsResponse>> GetFilmWithRatings(Guid filmId, IRatingsService ratingsService)
+	public async Task<ActionResult<FilmsResponse>> GetFilmWithRatings(Guid filmId, IRatingsService ratingsService)
 	{
 		var film = await _filmsService.GetFilm(filmId);
 		var ratings = await ratingsService.GetAllRatings(film);
 		
 		var ratingsResponse = ratings.Select(r => new RatingsResponse(r.Id, r.Value)).ToList(); 
-		var response = new FilmWithRatingsResponse(film.Id, film.Title, film.Description, Film.AverageRating(ratings), ratingsResponse);
+		var response = new FilmsResponse(film.Id, film.Title, film.Description, Film.AverageRating(ratings), ratingsResponse);
 		
 		return Ok(response);
 	}
@@ -83,22 +74,22 @@ public class FilmsController : ControllerBase
 	}
 
 	[Authorize(Policy="AdminPolicy")]
-	[HttpPut("{id:guid}")]
-	public async Task<ActionResult<Guid>> UpdateFilm(Guid id, [FromBody] FilmsRequest request)
+	[HttpPut("{filmId:guid}")]
+	public async Task<ActionResult<Guid>> UpdateFilm(Guid filmId, [FromBody] FilmsRequest request)
 	{
 		
 		//validation occurs on creating film obj
-		var film = new Film(id, request.Title, request.Description);
+		var film = new Film(filmId, request.Title, request.Description);
 		
-		var filmId = await _filmsService.UpdateFilm(id, request.Title, request.Description);
+		filmId = await _filmsService.UpdateFilm(filmId, request.Title, request.Description);
 		return Ok(filmId);
 	}
 	
 	[Authorize(Policy="AdminPolicy")]
-	[HttpDelete("{id:guid}")]
-	public async Task<ActionResult<Guid>> DeleteFilm(Guid id)
+	[HttpDelete("{filmId:guid}")]
+	public async Task<ActionResult<Guid>> DeleteFilm(Guid filmId)
 	{
-		var filmId = await _filmsService.DeleteFilm(id);
+		filmId = await _filmsService.DeleteFilm(filmId);
 		return Ok(filmId);
 	}
 }

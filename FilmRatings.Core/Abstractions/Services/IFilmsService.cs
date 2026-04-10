@@ -1,12 +1,11 @@
 using FilmRatings.Core.Models;
 
-namespace FilmRatings.Core.Abstractions;
+namespace FilmRatings.Core.Abstractions.Services;
 
-public interface IFilmsService : IAddRatingsToFilmsService
+public interface IFilmsService 
 {
 	
-	Task<List<Film>> GetAllFilms();
-
+	Task<List<Film>> GetAllFilms(string? include);
 	Task<Film> GetFilm(Guid id);
 
 	Task<Guid> AddFilm(Film film);
@@ -14,10 +13,6 @@ public interface IFilmsService : IAddRatingsToFilmsService
 	Task<Guid> UpdateFilm(Guid id, string title, string description);
 
 	Task<Guid> DeleteFilm(Guid id);
+	// Task<List<Film>> AddRatingsToFilms(List<Film> films, IRatingsService ratingsService);
 
-}
-
-public interface IAddRatingsToFilmsService
-{
-	Task<List<Film>> AddRatingsToFilms(List<Film> films, IRatingsService ratingsService);
 }

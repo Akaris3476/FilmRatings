@@ -19,8 +19,6 @@ public class Film
 		SetDescription(description);
 	}
 	
-
-	
 	public void SetTitle(string title)
 	{
 		if (string.IsNullOrWhiteSpace(title))
@@ -51,9 +49,9 @@ public class Film
 		_ratings.Add(rating);
 	}
 
-	public void SetRatingList(List<Rating> ratings)
+	public void SetRatingList(IEnumerable<Rating> ratings)
 	{
-		_ratings = ratings;
+		_ratings = ratings.ToList();
 	}
 	
 	

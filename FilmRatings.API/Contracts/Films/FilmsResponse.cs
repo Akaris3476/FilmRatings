@@ -1,19 +1,11 @@
-using FilmRatings.Core.Models;
+using FilmRatings.Contracts.Ratings;
 
-namespace FilmRatings.Contracts;
+namespace FilmRatings.Contracts.Films;
 
 public record FilmsResponse(
 	Guid Id,
 	string Title,
-	string Description
-	// float AverageRating
-	// IReadOnlyCollection<RatingsResponse> Ratings
-);
-
-public record FilmWithRatingsResponse(
-	Guid Id,
-	string Title,
 	string Description,
-	float AverageRating,
-	IReadOnlyCollection<RatingsResponse> Ratings
-	);
+	float? AverageRating = null,
+	IReadOnlyCollection<RatingsResponse>? Ratings = null
+);

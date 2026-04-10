@@ -1,6 +1,6 @@
 using FilmRatings.Core.Models;
 
-namespace FilmRatings.Core.Abstractions;
+namespace FilmRatings.Core.Abstractions.Services;
 
 public interface IRatingsService
 {

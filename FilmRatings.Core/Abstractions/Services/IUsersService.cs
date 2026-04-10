@@ -1,4 +1,4 @@
-namespace FilmRatings.Application.Services;
+namespace FilmRatings.Core.Abstractions.Services;
 
 public interface IUsersService
 {

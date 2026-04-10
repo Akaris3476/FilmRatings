@@ -1,10 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace FilmRatings.Core.Models;
 
 public class Rating
 {
 	public Guid Id { get; private set; }
 	public int Value { get; private set; }
-	public Film Film { get; private set; }
+	// public Film Film { get; private set; }
 	public Guid FilmId { get; private set; }
 	
 	// public User User { get; private set; }
@@ -13,12 +15,12 @@ public class Rating
 	
 	// TODO: add user owner
 
-	public Rating(Guid id, int value, Film film)
+	public Rating(Guid id, int value, Guid filmId)
 	{
 		Id = id;
 		SetValue(value);
-		FilmId = film.Id;
-		Film = film;
+		FilmId = filmId;
+		// Film = film;
 		
 	}
 	

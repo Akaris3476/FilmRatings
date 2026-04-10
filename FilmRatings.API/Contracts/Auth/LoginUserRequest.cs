@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FilmRatings.Contracts;
+namespace FilmRatings.Contracts.Auth;
 
 public record LoginUserRequest(
 	[Required] string Email,
