@@ -78,7 +78,7 @@ public class RatingsRepository : IRatingsRepository
 		await _dbContext.Ratings.AddAsync(ratingEntity);
 		await _dbContext.SaveChangesAsync();
 		
-		await _distributedCache.RemoveAsync($"{nameof(Film)}-{rating.FilmId}-AllRatings");
+		await InvalidateCache(rating.FilmId);
 
 		return rating.Id;
 	}
@@ -91,8 +91,8 @@ public class RatingsRepository : IRatingsRepository
 			.ExecuteUpdateAsync(e => e
 				.SetProperty(p => p.Value, p => rating.Value));
 		
-		await _distributedCache.RemoveAsync($"{nameof(Film)}-{rating.FilmId}-AllRatings");
-
+		await InvalidateCache(rating.FilmId);
+		
 		return rating.Id;
 		
 	}
@@ -111,8 +111,18 @@ public class RatingsRepository : IRatingsRepository
 		_dbContext.Ratings.Remove(ratingEntity);
 		await _dbContext.SaveChangesAsync();
 		
-		await _distributedCache.RemoveAsync($"{nameof(Film)}-{ratingEntity.FilmId}-AllRatings");
-		
+		await InvalidateCache(ratingEntity.FilmId);
+			
 		return id;
-	}	
+	}
+
+	private async Task InvalidateCache(Guid filmId)
+	{
+		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
+		{
+			await _distributedCache.RemoveAsync($"all-films-include-{(int)includeOption}");
+		}
+		await _distributedCache.RemoveAsync($"{nameof(Rating)}-{filmId}-AllRatings");
+		
+	}
 }

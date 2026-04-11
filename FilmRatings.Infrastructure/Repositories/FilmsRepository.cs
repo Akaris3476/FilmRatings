@@ -19,36 +19,8 @@ public class FilmsRepository : IFilmsRepository
 	}
 	
 	
-	// public async Task<List<Film>> GetAll()
-	// {
-	// 			
-	// 	string key = "all-films";
-	// 	
-	// 	string? cachedFilm = await _distributedCache.GetStringAsync(key);
-	//
-	// 	if (!string.IsNullOrEmpty(cachedFilm))
-	// 	{
-	// 		var cacheFilms = JsonConvert.DeserializeObject<List<Film>>(cachedFilm);
-	// 		
-	// 		if (cacheFilms is not null) 
-	// 			return cacheFilms;
-	// 	}
-	//
-	//
-	// 	List<FilmEntity> filmEntities = await _dbContext.Films
-	// 		.AsNoTracking()
-	// 		.ToListAsync();
-	// 	
-	// 	List<Film> films =  filmEntities
-	// 		.Select(filmEntity => new Film(filmEntity.Id, filmEntity.Title, filmEntity.Description))
-	// 		.ToList();
-	// 	
-	// 	await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(films));
-	//
-	// 	return films;
-	// }
 	
-	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions) 
+	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions =  FilmsIncludeOptions.None) 
 	{
 		string key = $"all-films-include-{(int)includeOptions}";
 		
@@ -143,11 +115,7 @@ public class FilmsRepository : IFilmsRepository
 		return film;
 
 	}
-
-	public async Task<List<Film>> GetAll()
-	{
-		throw new NotImplementedException();
-	}
+	
 
 	public async Task<Guid> Create(Film film)
 	{
@@ -162,7 +130,7 @@ public class FilmsRepository : IFilmsRepository
 		await _dbContext.AddAsync(filmEntity);
 		await _dbContext.SaveChangesAsync();
 		
-		_distributedCache.Remove("all-films");
+		await InvalidateCache();
 		
 		return film.Id;
 	}
@@ -176,8 +144,7 @@ public class FilmsRepository : IFilmsRepository
 				.SetProperty(p => p.Title, p => title)
 				.SetProperty(p => p.Description, p => description));
 	
-		_distributedCache.Remove($"{nameof(Film)}-{id}");
-		_distributedCache.Remove("all-films");
+		await InvalidateCache(id);
 
 		return id;
 	}
@@ -187,11 +154,22 @@ public class FilmsRepository : IFilmsRepository
 		await _dbContext.Films
 			.Where(f => f.Id == id)
 			.ExecuteDeleteAsync();
-		
-		_distributedCache.Remove($"{nameof(Film)}-{id}");
-		_distributedCache.Remove("all-films");
+
+		await InvalidateCache(id);
 
 		return id;
+	}
+	
+	private async Task InvalidateCache(Guid? id = null)
+	{
+		if (id is not null)
+			await _distributedCache.RemoveAsync($"{nameof(Film)}-{id}");
+		
+		await _distributedCache.RemoveAsync("all-films");
+		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
+		{
+			await _distributedCache.RemoveAsync($"all-films-include-{(int)includeOption}");
+		}
 	}
 	
 	

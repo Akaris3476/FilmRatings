@@ -1,4 +1,6 @@
-﻿namespace FilmRatings.Core.Models;
+﻿using Newtonsoft.Json;
+
+namespace FilmRatings.Core.Models;
 
 public class Film
 {
@@ -11,13 +13,24 @@ public class Film
 	public string Description { get; private set; } = string.Empty;
 	
 	public IReadOnlyCollection<Rating> Ratings => _ratings.AsReadOnly();
-
+	
+	
 	public Film(Guid id, string title, string description)
 	{
 		Id = id;
 		SetTitle(title);
 		SetDescription(description);
 	}
+	
+	[JsonConstructor]
+	private Film(Guid id, string title, string description,  IEnumerable<Rating> ratings)
+	{
+		Id = id;
+		SetTitle(title);
+		SetDescription(description);
+		SetRatingList(ratings);
+	}
+	
 	
 	public void SetTitle(string title)
 	{

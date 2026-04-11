@@ -21,9 +21,8 @@ public class FilmsController : ControllerBase
 	[HttpGet]
 	public async Task<ActionResult<List<FilmsResponse>>> GetFilms([FromQuery] string include = "")
 	{
-		List<Film> films;
 		
-		films = await _filmsService.GetAllFilms( include);
+		List<Film> films = await _filmsService.GetAllFilms(include);
 		
 		var response = films.Select(f => new FilmsResponse(
 				f.Id, f.Title, f.Description, f.AverageRating(),
