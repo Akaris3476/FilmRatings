@@ -10,4 +10,10 @@
       <ProjectReference Include="..\FilmRatings.Core\FilmRatings.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Caching.Abstractions">
+        <HintPath>..\FilmRatings.API\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

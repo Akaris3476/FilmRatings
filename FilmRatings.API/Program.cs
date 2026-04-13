@@ -42,6 +42,8 @@ builder.Services.AddTransient<IUsersService, UsersService>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddScoped<ICacheService, CacheService>();
+
 
 builder.Services.AddApiAuthentication(builder.Configuration);
 

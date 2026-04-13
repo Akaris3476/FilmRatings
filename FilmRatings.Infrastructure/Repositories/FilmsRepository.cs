@@ -2,37 +2,34 @@ using FilmRatings.Core.Abstractions.Repositories;
 using FilmRatings.Core.Models;
 using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
 
 namespace FilmRatings.Infrastructure.Repositories;
 
 public class FilmsRepository : IFilmsRepository
 {
 	private readonly FilmRatingsDbContext _dbContext;
-	private readonly IDistributedCache _distributedCache;
+	private readonly ICacheService _cacheService;
+	
+	private readonly TimeSpan _filmCacheDuration = TimeSpan.FromMinutes(5);
+	private readonly TimeSpan _allFilmsCacheDuration = TimeSpan.FromHours(10);
 
-	public FilmsRepository(FilmRatingsDbContext dbContext, IDistributedCache distributedCache)
+	public FilmsRepository(FilmRatingsDbContext dbContext,  ICacheService cacheService)
 	{
 		_dbContext = dbContext;
-		_distributedCache = distributedCache;
+		_cacheService = cacheService;
 	}
 	
 	
 	
-	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions =  FilmsIncludeOptions.None) 
+	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions = FilmsIncludeOptions.None) 
 	{
 		string key = $"all-films-include-{(int)includeOptions}";
 		
-		string? cachedFilms = await _distributedCache.GetStringAsync(key);
+		List<Film>? cachedFilms = await _cacheService.GetAsync<List<Film>>(key);
 		
-		if (!string.IsNullOrEmpty(cachedFilms))
-		{
-			var cacheFilms = JsonConvert.DeserializeObject<List<Film>>(cachedFilms);
-			
-			if (cacheFilms is not null) 
-				return cacheFilms;
-		}
+		if (cachedFilms is not null)
+				return cachedFilms;
+		
 		
 		IQueryable<FilmEntity> filmEntities = _dbContext.Films
 			.AsNoTracking();
@@ -78,7 +75,7 @@ public class FilmsRepository : IFilmsRepository
 			})
 			.ToList();
 		
-		await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(films));
+		await _cacheService.SetAsync(key, films, _allFilmsCacheDuration);
 
 		return films;
 	}
@@ -88,15 +85,10 @@ public class FilmsRepository : IFilmsRepository
 		
 		string key = $"{nameof(Film)}-{id}";
 		
-		string? cachedFilm = await _distributedCache.GetStringAsync(key);
-
-		if (!string.IsNullOrEmpty(cachedFilm))
-		{
-			var cacheFilm = JsonConvert.DeserializeObject<Film>(cachedFilm);
-			
-			 if (cacheFilm is not null) 
-				 return cacheFilm;
-		}
+		Film? cachedFilm = await _cacheService.GetAsync<Film>(key);
+		
+		if (cachedFilm is not null) 
+			return cachedFilm;
 		
 		
 		var filmEntity = await _dbContext.Films
@@ -110,7 +102,7 @@ public class FilmsRepository : IFilmsRepository
 		
 		Film film = new(filmEntity.Id, filmEntity.Title, filmEntity.Description);
 		
-		await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(film));
+		await _cacheService.SetAsync(key, film, _filmCacheDuration);
 		
 		return film;
 
@@ -163,12 +155,12 @@ public class FilmsRepository : IFilmsRepository
 	private async Task InvalidateCache(Guid? id = null)
 	{
 		if (id is not null)
-			await _distributedCache.RemoveAsync($"{nameof(Film)}-{id}");
+			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}");
 		
-		await _distributedCache.RemoveAsync("all-films");
+		await _cacheService.RemoveAsync("all-films");
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
-			await _distributedCache.RemoveAsync($"all-films-include-{(int)includeOption}");
+			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}");
 		}
 	}
 	

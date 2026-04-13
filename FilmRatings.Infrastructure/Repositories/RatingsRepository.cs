@@ -2,20 +2,21 @@ using FilmRatings.Core.Abstractions.Repositories;
 using FilmRatings.Core.Models;
 using FilmRatings.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
 
 namespace FilmRatings.Infrastructure.Repositories;
 
 public class RatingsRepository : IRatingsRepository
 {
 	private readonly FilmRatingsDbContext _dbContext;
-	private readonly IDistributedCache _distributedCache;
+	private readonly ICacheService _cacheService;
+	
+	private readonly TimeSpan _ratingCacheDuration = TimeSpan.FromMinutes(5);
+	private readonly TimeSpan _allRatingsCacheDuration = TimeSpan.FromHours(10);
 
-	public RatingsRepository(FilmRatingsDbContext dbContext, IDistributedCache distributedCache)
+	public RatingsRepository(FilmRatingsDbContext dbContext, ICacheService cacheService)
 	{
 		_dbContext = dbContext;
-		_distributedCache = distributedCache;
+		_cacheService = cacheService;
 	}
 
 	public async Task<List<Rating>> GetAll(Film film)
@@ -24,15 +25,10 @@ public class RatingsRepository : IRatingsRepository
 				
 		string key = $"{nameof(Film)}-{film.Id}-AllRatings";
 		
-		string? cachedRatings = await _distributedCache.GetStringAsync(key);
-
-		if (!string.IsNullOrEmpty(cachedRatings))
-		{
-			var cacheRatings = JsonConvert.DeserializeObject<List<Rating>>(cachedRatings);
-			
-			if (cacheRatings is not null) 
-				return cacheRatings;
-		}
+		List<Rating>? cachedRatings = await _cacheService.GetAsync<List<Rating>>(key);
+		
+		if (cachedRatings is not null) 
+			return cachedRatings;
 
 		
 		var ratingEntities = await _dbContext.Ratings
@@ -45,7 +41,7 @@ public class RatingsRepository : IRatingsRepository
 			.Select(ratingEntity => new Rating(ratingEntity.Id, ratingEntity.Value, film.Id))
 			.ToList();
 		
-		await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(ratings));
+		await _cacheService.SetAsync(key, ratings,  _allRatingsCacheDuration);
 		
 		return ratings;
 	}
@@ -120,9 +116,10 @@ public class RatingsRepository : IRatingsRepository
 	{
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
-			await _distributedCache.RemoveAsync($"all-films-include-{(int)includeOption}");
+			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}");
 		}
-		await _distributedCache.RemoveAsync($"{nameof(Rating)}-{filmId}-AllRatings");
+		
+		await _cacheService.RemoveAsync($"{nameof(Rating)}-{filmId}-AllRatings");
 		
 	}
 }
