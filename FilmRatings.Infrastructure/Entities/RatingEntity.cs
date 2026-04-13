@@ -9,7 +9,7 @@ public class RatingEntity
 	
 	public Guid? UserId { get; set; }
 	
-	public UserEntity User { get; set; } = null!; 
+	public UserEntity? User { get; set; } = null!; 
 	
 	public Guid FilmId { get; set; }
 

@@ -14,16 +14,27 @@ public class FilmsService : IFilmsService
 	}
 
 
-	public async Task<List<Film>> GetAllFilms(string? include)
+	public async Task<List<Film>> GetAllFilms(string include = "")
 	{
-		if (string.IsNullOrEmpty(include)) return await _filmsRepository.GetAll(FilmsIncludeOptions.None);
+		if (string.IsNullOrWhiteSpace(include)) 
+			return await _filmsRepository.GetAll();
 		
 		FilmsIncludeOptions includeOptions = ParseIncludeString(include);
 		
 		return await _filmsRepository.GetAll(includeOptions);
 
 	}
+	
+	public async Task<Film> GetFilm(Guid id, string include = "")
+	{
+		if (string.IsNullOrWhiteSpace(include))
+			return await _filmsRepository.GetById(id);
+		
+		FilmsIncludeOptions includeOptions = ParseIncludeString(include);
 
+		return await _filmsRepository.GetById(id, includeOptions);
+	}
+	
 	private FilmsIncludeOptions ParseIncludeString(string include)
 	{
 		FilmsIncludeOptions includeOptions = new();
@@ -35,11 +46,6 @@ public class FilmsService : IFilmsService
 		}
 		
 		return includeOptions;
-	}
-	
-	public async  Task<Film> GetFilm(Guid id)
-	{
-		return await _filmsRepository.GetById(id);
 	}
 
 	public async Task<Guid> AddFilm(Film film)

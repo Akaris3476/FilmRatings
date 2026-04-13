@@ -26,7 +26,7 @@ public class FilmsController : ControllerBase
 		
 		var response = films.Select(f => new FilmsResponse(
 				f.Id, f.Title, f.Description, f.AverageRating(),
-				f.Ratings.Select(r => new RatingsResponse(r.Id, r.Value))
+				f.Ratings.Select(r => new RatingsResponse(r.Id, r.UserId, r.Username, r.Value))
 					.ToList()
 			)
 		);
@@ -37,26 +37,17 @@ public class FilmsController : ControllerBase
 
 	
 	[HttpGet("{filmId}")]
-	public async Task<ActionResult<FilmsResponse>> GetFilm(Guid filmId)
+	public async Task<ActionResult<FilmsResponse>> GetFilm(Guid filmId, [FromQuery] string include = "")
 	{
 		
-		 var film = await _filmsService.GetFilm(filmId);
-		 var response = new FilmsResponse(film.Id, film.Title, film.Description);
+		 var film = await _filmsService.GetFilm(filmId, include);
+		 
+		 var response = new FilmsResponse(
+			 film.Id, film.Title, film.Description, film.AverageRating(), 
+			 film.Ratings.Select(r => new RatingsResponse(r.Id, r.UserId, r.Username, r.Value))
+				 .ToList());
 
-		 return response;
-
-	}
-	
-	[HttpGet("all/{filmId}")]
-	public async Task<ActionResult<FilmsResponse>> GetFilmWithRatings(Guid filmId, IRatingsService ratingsService)
-	{
-		var film = await _filmsService.GetFilm(filmId);
-		var ratings = await ratingsService.GetAllRatings(film);
-		
-		var ratingsResponse = ratings.Select(r => new RatingsResponse(r.Id, r.Value)).ToList(); 
-		var response = new FilmsResponse(film.Id, film.Title, film.Description, Film.AverageRating(ratings), ratingsResponse);
-		
-		return Ok(response);
+		 return Ok(response);
 	}
 	
 	[Authorize(Policy="AdminPolicy")]

@@ -1,4 +1,3 @@
-using FilmRatings.Contracts;
 using FilmRatings.Contracts.Ratings;
 using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Core.Models;
@@ -8,7 +7,7 @@ namespace FilmRatings.Controllers;
 
 
 [ApiController]
-[Route("Films/{filmId}/[controller]")]
+[Route("films/{filmId}/ratings")]
 public class RatingsController : ControllerBase
 {
 	private readonly IRatingsService _ratingsService;
@@ -28,7 +27,7 @@ public class RatingsController : ControllerBase
 		var ratings = await _ratingsService.GetAllRatings(film);
 
 		var ratingsResponse = ratings
-			.Select(rating => new RatingsResponse(rating.Id, rating.Value));
+			.Select(rating => new RatingsResponse(rating.Id, rating.UserId, rating.Username, rating.Value));
 		
 		return Ok(ratingsResponse);
 	}

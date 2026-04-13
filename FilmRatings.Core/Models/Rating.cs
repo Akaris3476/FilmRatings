@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace FilmRatings.Core.Models;
 
@@ -6,12 +6,10 @@ public class Rating
 {
 	public Guid Id { get; private set; }
 	public int Value { get; private set; }
-	// public Film Film { get; private set; }
 	public Guid FilmId { get; private set; }
 	
-	// public User User { get; private set; }
-	//
-	// public Guid UserId { get; private set; }
+	public Guid? UserId { get; private set; }
+	public string? Username { get; private set; }
 	
 	// TODO: add user owner
 
@@ -20,10 +18,26 @@ public class Rating
 		Id = id;
 		SetValue(value);
 		FilmId = filmId;
-		// Film = film;
 		
 	}
 	
+	[JsonConstructor]
+	public Rating(Guid id, int value, Guid filmId, Guid? userId,  string? username)
+	{
+		Id = id;
+		SetValue(value);
+		FilmId = filmId;
+		
+		SetUser(userId, username);
+		
+	}
+
+	public void SetUser(Guid? userId, string? username)
+	{
+		UserId = userId;
+		Username = username;
+		
+	}
 	public void SetValue(int value)
 	{
 		if (value < 1 || value > 10)

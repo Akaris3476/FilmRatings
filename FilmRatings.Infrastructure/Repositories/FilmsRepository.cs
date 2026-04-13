@@ -31,26 +31,17 @@ public class FilmsRepository : IFilmsRepository
 				return cachedFilms;
 		
 		
-		IQueryable<FilmEntity> filmEntities = _dbContext.Films
+		IQueryable<FilmEntity> filmsQuery= _dbContext
+			.Films
 			.AsNoTracking();
 		
-		FilmsIncludeOptions[] possibleOptions = Enum.GetValues<FilmsIncludeOptions>();
+		filmsQuery = ApplyIncludeOptionsToQuery(filmsQuery, includeOptions);
 		
-		foreach (var option in possibleOptions)
-		{
-			if (option == FilmsIncludeOptions.None || !includeOptions.HasFlag(option)) 
-				continue;
-			
-			filmEntities = option switch
-			{
-				FilmsIncludeOptions.Ratings => filmEntities.Include(f => f.Ratings),
-				_ => filmEntities
-			};
-		}
 
-		List<FilmEntity> list = await filmEntities.ToListAsync();
+
+		List<FilmEntity> filmEntities = await filmsQuery.ToListAsync();
 		
-		var rawList = list
+		var rawList = filmEntities
 			.Select(f => new 
 			{
 				f.Id,
@@ -80,32 +71,55 @@ public class FilmsRepository : IFilmsRepository
 		return films;
 	}
 	
-	public async Task<Film> GetById(Guid id)
+	public async Task<Film> GetById(Guid id, FilmsIncludeOptions includeOptions = FilmsIncludeOptions.None)
 	{
 		
-		string key = $"{nameof(Film)}-{id}";
+		string key = $"{nameof(Film)}-{id}-include-{(int)includeOptions}";
 		
 		Film? cachedFilm = await _cacheService.GetAsync<Film>(key);
 		
 		if (cachedFilm is not null) 
 			return cachedFilm;
+
+
+		IQueryable<FilmEntity> filmQuery = _dbContext.Films
+			.AsNoTracking();
+			
 		
+		filmQuery = ApplyIncludeOptionsToQuery(filmQuery, includeOptions);
 		
-		var filmEntity = await _dbContext.Films
-			.AsNoTracking()
-			.FirstOrDefaultAsync(film => film.Id == id);
-		
+		FilmEntity? filmEntity = await filmQuery.FirstOrDefaultAsync(film => film.Id == id);
 		
 		if (filmEntity == null)
 			throw new KeyNotFoundException($"Film {id} not found");
 		
 		
 		Film film = new(filmEntity.Id, filmEntity.Title, filmEntity.Description);
+		film.SetRatingList(filmEntity.Ratings
+			.Select(r => new Rating(r.Id, r.Value, r.FilmId, r.UserId, r.User?.Username)));
 		
 		await _cacheService.SetAsync(key, film, _filmCacheDuration);
 		
 		return film;
 
+	}
+	
+	private IQueryable<FilmEntity> ApplyIncludeOptionsToQuery(IQueryable<FilmEntity> query, FilmsIncludeOptions includeOptions)
+	{
+		FilmsIncludeOptions[] possibleOptions = Enum.GetValues<FilmsIncludeOptions>();
+		
+		foreach (var option in possibleOptions)
+		{
+			if (option == FilmsIncludeOptions.None || !includeOptions.HasFlag(option)) 
+				continue;
+			
+			query = option switch
+			{
+				FilmsIncludeOptions.Ratings => query.Include(f => f.Ratings),
+				_ => query
+			};
+		}
+		return query;
 	}
 	
 
@@ -161,6 +175,7 @@ public class FilmsRepository : IFilmsRepository
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
 			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}");
+			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}-include-{(int)includeOption}");
 		}
 	}
 	
