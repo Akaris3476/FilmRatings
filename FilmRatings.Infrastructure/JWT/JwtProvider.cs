@@ -6,8 +6,7 @@ using FilmRatings.Core.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace FilmRatings.Infrastructure;
-
+namespace FilmRatings.Infrastructure.JWT;
 
 public class JwtProvider : IJwtProvider
 {
@@ -18,13 +17,14 @@ public class JwtProvider : IJwtProvider
 		_options = options.Value;
 	}
 	
-	public string GenerateToken(Guid userId, bool isAdmin)
+	public string GenerateToken(Guid userId, string username, bool isAdmin)
 	{
 		
 		Claim[] claims = 
 		[
-			new("userId", userId.ToString()),
-			new("Admin", isAdmin.ToString())
+			new(UserClaims.UserId, userId.ToString()),
+			new(UserClaims.IsAdmin, isAdmin.ToString()),
+			new(UserClaims.Username, username)
 		];
 		
 		var signingCredentials = new SigningCredentials(

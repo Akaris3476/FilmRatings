@@ -1,5 +1,6 @@
 using System.Text;
-using FilmRatings.Infrastructure;
+using FilmRatings.Core.Models;
+using FilmRatings.Infrastructure.JWT;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -46,7 +47,7 @@ public static class ApiExtensions
 		{
 			options.AddPolicy("AdminPolicy", policy =>
 			{
-				policy.RequireClaim("Admin", "True");
+				policy.RequireClaim(UserClaims.IsAdmin, "True");
 			});
 			
 		});

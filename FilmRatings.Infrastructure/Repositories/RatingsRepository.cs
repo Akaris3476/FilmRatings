@@ -34,11 +34,12 @@ public class RatingsRepository : IRatingsRepository
 		var ratingEntities = await _dbContext.Ratings
 			.AsNoTracking()
 			.Where(r => r.FilmId == film.Id)
+			.Include(ratingEntity => ratingEntity.User)
 			.ToListAsync();
 		
 		
 		var ratings = ratingEntities
-			.Select(ratingEntity => new Rating(ratingEntity.Id, ratingEntity.Value, film.Id))
+			.Select(ratingEntity => new Rating(ratingEntity.Id, ratingEntity.Value, film.Id, ratingEntity.UserId, ratingEntity.User?.Username))
 			.ToList();
 		
 		await _cacheService.SetAsync(key, ratings,  _allRatingsCacheDuration);
@@ -46,17 +47,18 @@ public class RatingsRepository : IRatingsRepository
 		return ratings;
 	}
 
-	public async Task<Rating> GetOne(Guid ratingId, Film film)
+	public async Task<Rating> GetOne(Guid ratingId)
 	{
 		
 		var ratingEntity = await _dbContext.Ratings
 			.AsNoTracking()
+			.Include(ratingEntity => ratingEntity.User)
 			.FirstOrDefaultAsync(r => r.Id == ratingId);
 		
 		if (ratingEntity == null)
 			throw new KeyNotFoundException($"Rating {ratingId} not found");
 		
-		var rating = new Rating(ratingEntity.Id, ratingEntity.Value, film.Id);
+		var rating = new Rating(ratingEntity.Id, ratingEntity.Value, ratingEntity.FilmId, ratingEntity.UserId, ratingEntity.User?.Username);
 		return rating;
 		
 	}
@@ -68,7 +70,9 @@ public class RatingsRepository : IRatingsRepository
 		{
 			Id = rating.Id,
 			FilmId = rating.FilmId,
-			Value = rating.Value
+			Value = rating.Value,
+			UserId = rating.UserId,
+			Username =  rating.Username
 		};
 			
 		await _dbContext.Ratings.AddAsync(ratingEntity);

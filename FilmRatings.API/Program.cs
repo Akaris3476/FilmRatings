@@ -5,6 +5,7 @@ using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Exceptions;
 using FilmRatings.Extensions;
 using FilmRatings.Infrastructure;
+using FilmRatings.Infrastructure.JWT;
 using FilmRatings.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 

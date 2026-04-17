@@ -47,7 +47,7 @@ public class FilmsRepository : IFilmsRepository
 				f.Id,
 				f.Title,
 				f.Description,
-				Ratings = f.Ratings.Select(r => new { r.Id, r.Value }).ToList()
+				Ratings = f.Ratings.Select(r => new { r.Id, r.Value, r.UserId, r.Username }).ToList()
 			});
 		
 		
@@ -57,7 +57,7 @@ public class FilmsRepository : IFilmsRepository
 				var film = new Film(entity.Id, entity.Title, entity.Description);
 
 				var ratings = entity.Ratings
-					.Select(r => new Rating(r.Id, r.Value, film.Id));
+					.Select(r => new Rating(r.Id, r.Value, film.Id, r.UserId, r.Username));
 				
 				film.SetRatingList(ratings);
 

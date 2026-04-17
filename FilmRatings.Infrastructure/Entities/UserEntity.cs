@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace FilmRatings.Infrastructure.Entities;
 
 public class UserEntity
@@ -5,8 +7,10 @@ public class UserEntity
 	
 	public Guid Id { get; set; }
 	
+	[MaxLength(20)]
 	public string Username { get; set; } = string.Empty;
 	
+	[MaxLength(20)]
 	public string Email { get; set; } = string.Empty;
 	
 	public string HashedPassword { get; set; } = string.Empty;

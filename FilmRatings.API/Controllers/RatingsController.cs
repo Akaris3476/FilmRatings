@@ -1,6 +1,8 @@
+using FilmRatings.Application.Services;
 using FilmRatings.Contracts.Ratings;
 using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilmRatings.Controllers;
@@ -34,10 +36,20 @@ public class RatingsController : ControllerBase
 	
 	
 	[HttpPost]
+	[Authorize]
 	public async Task<ActionResult<Guid>> CreateRating(Guid filmId, [FromBody] RatingsRequest request)
 	{
-
-		var rating = new Rating(Guid.NewGuid(), request.Rating, filmId);
+		string? userIdSerialized = User.FindFirst(UserClaims.UserId)?.Value;
+		Guid? userId;
+		
+		if (userIdSerialized is not null)
+			userId = Guid.Parse(userIdSerialized);
+		else
+			userId = null;
+		
+		string? username = User.FindFirst(UserClaims.Username)?.Value;
+		
+		var rating = new Rating(Guid.NewGuid(), request.Rating, filmId, userId, username);
 		
 		var ratingId = await _ratingsService.AddRating(rating);
 		
@@ -46,9 +58,20 @@ public class RatingsController : ControllerBase
 	}
 
 	[HttpPut("{ratingId:guid}")]
+	[Authorize]
 	public async Task<ActionResult<Guid>> UpdateRating(Guid filmId, Guid ratingId, [FromBody] RatingsRequest request)
 	{
-		var rating = new Rating(ratingId, request.Rating, filmId);
+
+		(Guid? userId, string? username, bool isAdmin) = ClaimService.ParseClaim(User);
+
+		bool ownsRating = await _ratingsService.IsRatingOwner(ratingId, userId);
+		
+		bool canAccessRating = ownsRating || isAdmin;
+		if (!canAccessRating)
+			return Forbid();
+		
+		
+		var rating = new Rating(ratingId, request.Rating, filmId, userId, username);
 		
 		ratingId = await _ratingsService.UpdateRating(rating);
 		
@@ -57,14 +80,21 @@ public class RatingsController : ControllerBase
 	}
 
 	[HttpDelete("{ratingId:guid}")]
-	public async Task<ActionResult<Guid>> DeleteRating( Guid ratingId)
+	[Authorize]
+	public async Task<ActionResult<Guid>> DeleteRating(Guid ratingId)
 	{
+		(Guid? userId, _, bool isAdmin) = ClaimService.ParseClaim(User);
+
+		bool ownsRating = await _ratingsService.IsRatingOwner(ratingId, userId);
 		
+		bool canAccessRating = ownsRating || isAdmin;
+		if (!canAccessRating)
+			return Forbid();
+
+
 		ratingId = await _ratingsService.DeleteRating(ratingId);
 		return Ok(ratingId);
 		
 	}
 	
-	// TODO: update only user's own ratings unless you're admin
-		
 }

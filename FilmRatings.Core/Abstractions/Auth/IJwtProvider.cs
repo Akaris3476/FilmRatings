@@ -2,5 +2,5 @@ namespace FilmRatings.Core.Abstractions.Auth;
 
 public interface IJwtProvider
 {
-	string GenerateToken(Guid userId, bool isAdmin);
+	string GenerateToken(Guid userId, string username, bool isAdmin);
 }

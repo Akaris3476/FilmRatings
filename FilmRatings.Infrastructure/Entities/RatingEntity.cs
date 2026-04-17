@@ -1,4 +1,6 @@
 
+using System.ComponentModel.DataAnnotations;
+
 namespace FilmRatings.Infrastructure.Entities;
 
 public class RatingEntity
@@ -9,7 +11,10 @@ public class RatingEntity
 	
 	public Guid? UserId { get; set; }
 	
-	public UserEntity? User { get; set; } = null!; 
+	[MaxLength(20)]
+	public string? Username { get; set; }
+	
+	public UserEntity? User { get; set; } 
 	
 	public Guid FilmId { get; set; }
 

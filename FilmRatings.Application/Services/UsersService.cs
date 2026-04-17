@@ -27,6 +27,11 @@ public class UsersService : IUsersService
 		if (password.Length < 6)
 			throw new ArgumentException("Password must be at least 6 characters long");
 		
+		bool isEmailTaken = await _usersRepository.IsEmailTaken(email);
+		if (isEmailTaken)
+			throw new ArgumentException("Email is already taken. Try another email");
+		
+		
 		var hashedPassword = _passwordHasher.Generate(password);
 
 		var user = new User(Guid.NewGuid(), email, username, hashedPassword);
@@ -44,7 +49,7 @@ public class UsersService : IUsersService
 		if (!result)
 			throw new ArgumentException("Invalid password");
 		
-		var token = _jwtProvider.GenerateToken(user.Id, user.IsAdmin);
+		var token = _jwtProvider.GenerateToken(user.Id, user.Username, user.IsAdmin);
 		
 		return token;
 	}

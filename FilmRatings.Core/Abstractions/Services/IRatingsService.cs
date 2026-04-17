@@ -8,5 +8,6 @@ public interface IRatingsService
 	Task<Guid> AddRating(Rating rating);
 	Task<Guid> UpdateRating(Rating rating);
 	Task<Guid> DeleteRating(Guid id);
-	Task<Rating> GetOneRating(Guid ratingId, Film film);
+	Task<Rating> GetOneRating(Guid ratingId);
+	Task<bool> IsRatingOwner(Guid ratingId, Guid? userId);
 }

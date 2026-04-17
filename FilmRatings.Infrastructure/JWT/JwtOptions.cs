@@ -1,4 +1,4 @@
-namespace FilmRatings.Infrastructure;
+namespace FilmRatings.Infrastructure.JWT;
 
 public class JwtOptions
 {

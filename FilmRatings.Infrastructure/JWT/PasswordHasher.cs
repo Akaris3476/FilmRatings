@@ -1,6 +1,6 @@
 using FilmRatings.Core.Abstractions.Auth;
 
-namespace FilmRatings.Infrastructure;
+namespace FilmRatings.Infrastructure.JWT;
 
 public class PasswordHasher : IPasswordHasher
 {

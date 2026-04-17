@@ -31,6 +31,15 @@ public class UsersRepository : IUsersRepository
 		return userEntity.Id;
 
 	}
+
+	public async Task<bool> IsEmailTaken(string email)
+	{
+		bool isEmailTaken = await _dbContext.Users
+			.AnyAsync(u => string.Equals(u.Email, email));
+		
+		return isEmailTaken;
+		
+	}
 	
 	public async Task<User> GetByEmail(string email)
 	{

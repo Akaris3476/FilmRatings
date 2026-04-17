@@ -4,8 +4,6 @@ using FilmRatings.Core.Models;
 
 namespace FilmRatings.Application.Services;
 
-
-
 public class RatingsService : IRatingsService
 {
 	private readonly IRatingsRepository _ratingsRepository;
@@ -20,9 +18,9 @@ public class RatingsService : IRatingsService
 		return await _ratingsRepository.GetAll(film);
 	}
 
-	public async Task<Rating> GetOneRating(Guid ratingId, Film film)
+	public async Task<Rating> GetOneRating(Guid ratingId)
 	{
-		return await _ratingsRepository.GetOne(ratingId, film);
+		return await _ratingsRepository.GetOne(ratingId);
 	}
 	
 	public async Task<Guid> AddRating(Rating rating)
@@ -38,6 +36,14 @@ public class RatingsService : IRatingsService
 	public async Task<Guid> DeleteRating(Guid id)
 	{
 		return await _ratingsRepository.Delete(id);
+	}
+
+	public async Task<bool> IsRatingOwner(Guid ratingId, Guid? userId)
+	{
+		if (userId is null) return false;
+		
+		Rating rating = await _ratingsRepository.GetOne(ratingId);
+		return rating.UserId == userId;
 	}
 	
 }
