@@ -2,10 +2,10 @@ using FilmRatings.Core.Models;
 
 namespace FilmRatings.Core.Abstractions.Services;
 
-public interface IFilmsService 
+public interface IFilmsService
 {
-	
-	Task<List<Film>> GetAllFilms(string include = "", string? title = null);
+	Task<List<Film>> GetFilms(string? title, int page, string include = "");
+	Task<(int totalPages, int totalFilms)> GetFilmsCount();
 	Task<Film> GetFilm(Guid id, string include = "");
 
 	Task<Guid> AddFilm(Film film);

@@ -7,31 +7,37 @@ namespace FilmRatings.Application.Services;
 public class FilmsService : IFilmsService
 {
 	private readonly IFilmsRepository _filmsRepository;
-
 	public FilmsService(IFilmsRepository filmsRepository)
 	{
 		_filmsRepository = filmsRepository;
 	}
 
 
-	public async Task<List<Film>> GetAllFilms(string include = "", string? title = null)
+	
+
+	public async Task<List<Film>> GetFilms(string? title, int page = 1, string include = "")
 	{
 		title = title?.Trim();
-
-		if (string.IsNullOrWhiteSpace(include)) 
-			return await _filmsRepository.GetAll(title, FilmsIncludeOptions.None);
+		
+		if (page < 1)
+			throw new ArgumentException("Page must be greater than or equal to 1.");
 		
 		FilmsIncludeOptions includeOptions = ParseIncludeOptions(include);
 		
-		return await _filmsRepository.GetAll(title, includeOptions);
+		return await _filmsRepository.GetAll(title, page, includeOptions);
 
+	}
+
+	public async Task<(int totalPages, int totalFilms)> GetFilmsCount()
+	{
+		
+		int totalFilms = await _filmsRepository.GetFilmCount();
+		int totalPages = (int)Math.Ceiling((double)totalFilms / _filmsRepository.pageSize);
+ 		return (totalPages, totalFilms);
 	}
 	
 	public async Task<Film> GetFilm(Guid id, string include = "")
 	{
-		if (string.IsNullOrWhiteSpace(include))
-			return await _filmsRepository.GetById(id, FilmsIncludeOptions.None);
-		
 		FilmsIncludeOptions includeOptions = ParseIncludeOptions(include);
 
 		return await _filmsRepository.GetById(id, includeOptions);
@@ -39,6 +45,9 @@ public class FilmsService : IFilmsService
 	
 	private FilmsIncludeOptions ParseIncludeOptions(string include)
 	{
+		if (string.IsNullOrWhiteSpace(include))
+			return FilmsIncludeOptions.None;
+		
 		FilmsIncludeOptions includeOptions = new();
 		
 		foreach (string s in include.Split(","))

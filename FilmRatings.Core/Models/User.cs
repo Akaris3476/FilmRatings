@@ -31,7 +31,7 @@ public class User
 	
 	public void SetEmail(string email)
 	{
-		if (!email.Contains("@"))
+		if (!email.Contains('@'))
 			throw new ArgumentException("Email must contain @");
 		
 		Email = email;

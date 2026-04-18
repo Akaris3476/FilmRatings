@@ -1,3 +1,4 @@
+using FilmRatings.Contracts;
 using FilmRatings.Contracts.Films;
 using FilmRatings.Contracts.Ratings;
 using FilmRatings.Core.Abstractions.Services;
@@ -19,18 +20,22 @@ public class FilmsController : ControllerBase
 	}
 	
 	[HttpGet]
-	public async Task<ActionResult<List<FilmsResponse>>> GetFilms(
-		[FromQuery] string include = "", string? title = null)
+	public async Task<ActionResult<PageResponse<FilmsResponse>>> GetFilms(
+		[FromQuery] string include = "", string? title = null, int page = 1)
 	{
 		
-		List<Film> films = await _filmsService.GetAllFilms(include, title);
+		List<Film> films = await _filmsService.GetFilms(title, page, include);
+		(int totalPages, int totalFilms) = await _filmsService.GetFilmsCount();
 		
-		var response = films.Select(f => new FilmsResponse(
+		var filmsResponse = films.Select(f => new FilmsResponse(
 				f.Id, f.Title, f.Description, f.AverageRating(),
 				f.Ratings.Select(r => new RatingsResponse(r.Id, r.UserId, r.Username, r.Value))
 					.ToList()
 			)
 		);
+		
+		var response = new PageResponse<FilmsResponse>(
+			page, totalPages, totalFilms, filmsResponse);
 		
 		return Ok(response);
 	}

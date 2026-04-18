@@ -9,8 +9,9 @@ This application allows to browse films, submit ratings and view statistics like
 Get /films                  # Get films
 Get /films?include=ratings  # Get films with ratings
 Get /films?title            # Search films by title 
+Get /films?page             # Specify page 
+
 Get /films/{filmId}         # Get particular film 
-Get /films?include=ratings  # Get film with ratings
 Put /films/{filmId}         # Update film
 Delete /films/{filmId}      # Delete film
 
@@ -30,4 +31,4 @@ Post /auth/login
 docker run -p 6379:6379 --name redis -d redis
 dotnet run
 ```
-
+Also requires PostgreSQL

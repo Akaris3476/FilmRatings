@@ -13,6 +13,9 @@ public class FilmsRepository : IFilmsRepository
 	private readonly TimeSpan _filmCacheDuration = TimeSpan.FromMinutes(2);
 	private readonly TimeSpan _allFilmsCacheDuration = TimeSpan.FromMinutes(4);
 	private readonly TimeSpan _allFilmsWithTitleCacheDuration = TimeSpan.FromMinutes(1);
+	private readonly TimeSpan _filmsCountDuration = TimeSpan.FromMinutes(5);
+
+	public int pageSize => 5;
 
 	public FilmsRepository(FilmRatingsDbContext dbContext,  ICacheService cacheService)
 	{
@@ -23,18 +26,22 @@ public class FilmsRepository : IFilmsRepository
 	
 	
 	public async Task<List<Film>> GetAll(
-		string? title, FilmsIncludeOptions includeOptions)
+		string? title, int page, FilmsIncludeOptions includeOptions)
 	{
-		string key = $"all-films-include-{(int)includeOptions}-title-{title}";
+		string key = $"all-films-include-{(int)includeOptions}-title-{title}-page-{page}";
 
 		List<Film>? cachedFilms = await _cacheService.GetAsync<List<Film>>(key);
 		
 		if (cachedFilms is not null)
 				return cachedFilms;
 		
+		int filmsToSkip = (page - 1) * pageSize;
 		
 		IQueryable<FilmEntity> filmsQuery= _dbContext
 			.Films
+			.OrderBy(f => f.Id)
+			.Skip(filmsToSkip)
+			.Take(pageSize)
 			.AsNoTracking();
 
 		if (title is not null)
@@ -131,6 +138,21 @@ public class FilmsRepository : IFilmsRepository
 		}
 		return query;
 	}
+
+	public async Task<int> GetFilmCount()
+	{
+		string key = $"{nameof(Film)}-{nameof(GetFilmCount)}";
+		int? cachedCount = await _cacheService.GetAsync<int?>(key);
+		
+		if (cachedCount is not null)
+			return cachedCount.Value;
+		
+		int count = await _dbContext.Films.CountAsync();
+		
+		await _cacheService.SetAsync(key, count, _filmsCountDuration);
+		
+		return count;
+	}
 	
 
 	public async Task<Guid> Create(Film film)
@@ -182,9 +204,16 @@ public class FilmsRepository : IFilmsRepository
 			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}");
 		
 		await _cacheService.RemoveAsync("all-films");
+		await _cacheService.RemoveAsync($"{nameof(Film)}-{nameof(GetFilmCount)}");
+		
+		int filmCount = await GetFilmCount();
+		int pageCount = (int)Math.Ceiling((double)filmCount / pageSize);
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
-			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}-title-null");
+			for (int i = 0; i < pageCount; i++)
+			{
+				await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}-title--page-{pageCount}");
+			}
 			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}-include-{(int)includeOption}");
 		}
 	}
