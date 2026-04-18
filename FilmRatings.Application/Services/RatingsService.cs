@@ -13,9 +13,19 @@ public class RatingsService : IRatingsService
 		_ratingsRepository = ratingsRepository;
 	}
 
-	public async Task<List<Rating>> GetAllRatings(Film film)
+	public async Task<List<Rating>> GetRatings(Guid filmId, int page)
 	{
-		return await _ratingsRepository.GetAll(film);
+		if (page < 1)
+			throw new ArgumentException("Page must be greater than or equal to 1.");
+		
+		return await _ratingsRepository.GetAll(filmId, page);
+	}
+	
+	public async Task<(int totalPages, int totalRatings)> GetRatingsCount(Guid filmId)
+	{
+		int totalRatings = await _ratingsRepository.GetRatingsCount(filmId);
+		int totalPages = (int)Math.Ceiling((double) totalRatings / _ratingsRepository.PageSize);
+		return (totalPages, totalRatings);
 	}
 
 	public async Task<Rating> GetOneRating(Guid ratingId)

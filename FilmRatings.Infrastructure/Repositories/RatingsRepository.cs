@@ -11,41 +11,66 @@ public class RatingsRepository : IRatingsRepository
 	private readonly ICacheService _cacheService;
 	
 	private readonly TimeSpan _ratingCacheDuration = TimeSpan.FromMinutes(5);
-	private readonly TimeSpan _allRatingsCacheDuration = TimeSpan.FromHours(10);
+	private readonly TimeSpan _allRatingsCacheDuration = TimeSpan.FromMinutes(5);
+	private readonly TimeSpan _ratingsCountDuration = TimeSpan.FromMinutes(5);
 
+	public int PageSize => 5;
+	
 	public RatingsRepository(FilmRatingsDbContext dbContext, ICacheService cacheService)
 	{
 		_dbContext = dbContext;
 		_cacheService = cacheService;
 	}
-
-	public async Task<List<Rating>> GetAll(Film film)
+	
+	public async Task<List<Rating>> GetAll(Guid filmId, int page)
 	{
 		
 				
-		string key = $"{nameof(Film)}-{film.Id}-AllRatings";
+		string key = $"{nameof(Film)}-{filmId}-AllRatings-page-{page}";
 		
 		List<Rating>? cachedRatings = await _cacheService.GetAsync<List<Rating>>(key);
 		
 		if (cachedRatings is not null) 
 			return cachedRatings;
 
+		int ratingsToSkip = (page - 1) * PageSize;
 		
 		var ratingEntities = await _dbContext.Ratings
 			.AsNoTracking()
-			.Where(r => r.FilmId == film.Id)
+			.OrderBy(r => r.Id)
+			.Where(r => r.FilmId == filmId)
+			.Skip(ratingsToSkip)
+			.Take(PageSize)
 			.Include(ratingEntity => ratingEntity.User)
 			.ToListAsync();
 		
 		
 		var ratings = ratingEntities
-			.Select(ratingEntity => new Rating(ratingEntity.Id, ratingEntity.Value, film.Id, ratingEntity.UserId, ratingEntity.User?.Username))
+			.Select(ratingEntity => new Rating(ratingEntity.Id, ratingEntity.Value, filmId, ratingEntity.UserId, ratingEntity.User?.Username))
 			.ToList();
 		
 		await _cacheService.SetAsync(key, ratings,  _allRatingsCacheDuration);
 		
 		return ratings;
 	}
+	
+	public async Task<int> GetRatingsCount(Guid filmId)
+	{
+		string key = $"{nameof(Film)}-{nameof(GetRatingsCount)}";
+		int? cachedCount = await _cacheService.GetAsync<int?>(key);
+		
+		if (cachedCount is not null)
+			return cachedCount.Value;
+		
+		int count = await _dbContext.Ratings
+			.Where(r => r.FilmId == filmId)
+			.CountAsync();
+		
+		await _cacheService.SetAsync(key, count, _ratingsCountDuration);
+		
+		return count;
+	}
+
 
 	public async Task<Rating> GetOne(Guid ratingId)
 	{
@@ -118,12 +143,20 @@ public class RatingsRepository : IRatingsRepository
 
 	private async Task InvalidateCache(Guid filmId)
 	{
+		await _cacheService.RemoveAsync($"{nameof(Film)}-{nameof(GetRatingsCount)}");
+		
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
 			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}");
 		}
 		
-		await _cacheService.RemoveAsync($"{nameof(Rating)}-{filmId}-AllRatings");
+		int filmCount = await GetRatingsCount(filmId);
+		int pageCount = (int)Math.Ceiling((double)filmCount / PageSize);
+		
+		for (int page = 0; page < pageCount; page++)
+		{
+			await _cacheService.RemoveAsync($"{nameof(Film)}-{filmId}-AllRatings-page-{page+1}");
+		}
 		
 	}
 }

@@ -31,8 +31,8 @@ public class FilmsService : IFilmsService
 	public async Task<(int totalPages, int totalFilms)> GetFilmsCount()
 	{
 		
-		int totalFilms = await _filmsRepository.GetFilmCount();
-		int totalPages = (int)Math.Ceiling((double)totalFilms / _filmsRepository.pageSize);
+		int totalFilms = await _filmsRepository.GetFilmsCount();
+		int totalPages = (int)Math.Ceiling((double)totalFilms / _filmsRepository.PageSize);
  		return (totalPages, totalFilms);
 	}
 	

@@ -4,8 +4,8 @@ namespace FilmRatings.Core.Abstractions.Repositories;
 
 public interface IFilmsRepository
 {
-	public int pageSize { get; }
-	Task<int> GetFilmCount();
+	int PageSize { get; }
+	Task<int> GetFilmsCount();
 	Task<List<Film>> GetAll(string? title, int page, FilmsIncludeOptions includeOptions);
 	Task<Guid> Create(Film film);
 	Task<Guid> Update(Guid id, string title, string description);

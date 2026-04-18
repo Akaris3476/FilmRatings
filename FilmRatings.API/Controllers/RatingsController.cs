@@ -1,4 +1,5 @@
 using FilmRatings.Application.Services;
+using FilmRatings.Contracts;
 using FilmRatings.Contracts.Ratings;
 using FilmRatings.Core.Abstractions.Services;
 using FilmRatings.Core.Models;
@@ -23,15 +24,22 @@ public class RatingsController : ControllerBase
 	
 	
 	[HttpGet]
-	public async Task<ActionResult<List<RatingsResponse>>> GetRatings(Guid filmId)
+	public async Task<ActionResult<PageResponse<RatingsResponse>>> GetRatings(
+		Guid filmId, [FromQuery] int page = 1)
 	{
-		var film = await _filmsService.GetFilm(filmId);
-		var ratings = await _ratingsService.GetAllRatings(film);
-
+		// var film = await _filmsService.GetFilm(filmId);
+		var ratings = await _ratingsService.GetRatings(filmId, page);
+		(int totalPages, int totalFilms) = await _ratingsService.GetRatingsCount(filmId);
+		
 		var ratingsResponse = ratings
 			.Select(rating => new RatingsResponse(rating.Id, rating.UserId, rating.Username, rating.Value));
 		
-		return Ok(ratingsResponse);
+		
+		
+		var response = new PageResponse<RatingsResponse>(
+			page, totalPages, totalFilms, ratingsResponse);
+		
+		return Ok(response);
 	}
 	
 	

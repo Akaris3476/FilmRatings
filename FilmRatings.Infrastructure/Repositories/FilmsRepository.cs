@@ -15,7 +15,7 @@ public class FilmsRepository : IFilmsRepository
 	private readonly TimeSpan _allFilmsWithTitleCacheDuration = TimeSpan.FromMinutes(1);
 	private readonly TimeSpan _filmsCountDuration = TimeSpan.FromMinutes(5);
 
-	public int pageSize => 5;
+	public int PageSize => 5;
 
 	public FilmsRepository(FilmRatingsDbContext dbContext,  ICacheService cacheService)
 	{
@@ -35,13 +35,13 @@ public class FilmsRepository : IFilmsRepository
 		if (cachedFilms is not null)
 				return cachedFilms;
 		
-		int filmsToSkip = (page - 1) * pageSize;
+		int filmsToSkip = (page - 1) * PageSize;
 		
 		IQueryable<FilmEntity> filmsQuery= _dbContext
 			.Films
 			.OrderBy(f => f.Id)
 			.Skip(filmsToSkip)
-			.Take(pageSize)
+			.Take(PageSize)
 			.AsNoTracking();
 
 		if (title is not null)
@@ -139,9 +139,9 @@ public class FilmsRepository : IFilmsRepository
 		return query;
 	}
 
-	public async Task<int> GetFilmCount()
+	public async Task<int> GetFilmsCount()
 	{
-		string key = $"{nameof(Film)}-{nameof(GetFilmCount)}";
+		string key = $"{nameof(Film)}-{nameof(GetFilmsCount)}";
 		int? cachedCount = await _cacheService.GetAsync<int?>(key);
 		
 		if (cachedCount is not null)
@@ -204,15 +204,15 @@ public class FilmsRepository : IFilmsRepository
 			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}");
 		
 		await _cacheService.RemoveAsync("all-films");
-		await _cacheService.RemoveAsync($"{nameof(Film)}-{nameof(GetFilmCount)}");
+		await _cacheService.RemoveAsync($"{nameof(Film)}-{nameof(GetFilmsCount)}");
 		
-		int filmCount = await GetFilmCount();
-		int pageCount = (int)Math.Ceiling((double)filmCount / pageSize);
+		int filmCount = await GetFilmsCount();
+		int pageCount = (int)Math.Ceiling((double)filmCount / PageSize);
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
-			for (int i = 0; i < pageCount; i++)
+			for (int page = 0; page < pageCount; page++)
 			{
-				await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}-title--page-{pageCount}");
+				await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}-title--page-{page+1}");
 			}
 			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}-include-{(int)includeOption}");
 		}
