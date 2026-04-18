@@ -15,6 +15,6 @@ public class RatingTests
 		var film = new Film(Guid.Empty, "superman", "some title");
 		
 
-		Assert.Throws<ArgumentException>(() => new Rating(Guid.NewGuid(), value, film));
+		Assert.Throws<ArgumentException>(() => new Rating(Guid.NewGuid(), value, film.Id));
 	}
 }

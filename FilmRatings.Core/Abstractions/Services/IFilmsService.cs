@@ -5,7 +5,7 @@ namespace FilmRatings.Core.Abstractions.Services;
 public interface IFilmsService 
 {
 	
-	Task<List<Film>> GetAllFilms(string include = "");
+	Task<List<Film>> GetAllFilms(string include = "", string? title = null);
 	Task<Film> GetFilm(Guid id, string include = "");
 
 	Task<Guid> AddFilm(Film film);

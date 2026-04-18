@@ -14,12 +14,12 @@ public class FilmTests
 		
 		var ratingList = new List<Rating>
 		{
-			new(Guid.Empty, 7, film),
-			new(Guid.Empty, 9, film),
-			new(Guid.Empty, 10, film),
-			new(Guid.Empty, 4, film),
-			new(Guid.Empty, 2, film),
-			new(Guid.Empty, 5, film),
+			new(Guid.Empty, 7, film.Id),
+			new(Guid.Empty, 9, film.Id),
+			new(Guid.Empty, 10, film.Id),
+			new(Guid.Empty, 4, film.Id),
+			new(Guid.Empty, 2, film.Id),
+			new(Guid.Empty, 5, film.Id),
 		};
 		film.SetRatingList(ratingList);
 		
@@ -57,7 +57,7 @@ public class FilmTests
 		var film = new Film(Guid.Empty, "Superman", "some description");
 		
 		var guid = Guid.Empty;
-		var rating = new Rating(guid, 5, film);
+		var rating = new Rating(guid, 5, film.Id);
 		
 		film.AddRating(rating);
 		
@@ -72,12 +72,12 @@ public class FilmTests
 		
 		var ratingList = new List<Rating>
 		{
-			new(Guid.Empty, 7, film),
-			new(Guid.Empty, 9, film),
-			new(Guid.Empty, 10, film),
-			new(Guid.Empty, 4, film),
-			new(Guid.Empty, 2, film),
-			new(Guid.Empty, 5, film),
+			new(Guid.Empty, 7, film.Id),
+			new(Guid.Empty, 9, film.Id),
+			new(Guid.Empty, 10, film.Id),
+			new(Guid.Empty, 4, film.Id),
+			new(Guid.Empty, 2, film.Id),
+			new(Guid.Empty, 5, film.Id),
 		};
 		film.SetRatingList(ratingList);
 

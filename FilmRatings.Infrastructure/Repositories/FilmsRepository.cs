@@ -10,8 +10,9 @@ public class FilmsRepository : IFilmsRepository
 	private readonly FilmRatingsDbContext _dbContext;
 	private readonly ICacheService _cacheService;
 	
-	private readonly TimeSpan _filmCacheDuration = TimeSpan.FromMinutes(5);
-	private readonly TimeSpan _allFilmsCacheDuration = TimeSpan.FromHours(10);
+	private readonly TimeSpan _filmCacheDuration = TimeSpan.FromMinutes(2);
+	private readonly TimeSpan _allFilmsCacheDuration = TimeSpan.FromMinutes(4);
+	private readonly TimeSpan _allFilmsWithTitleCacheDuration = TimeSpan.FromMinutes(1);
 
 	public FilmsRepository(FilmRatingsDbContext dbContext,  ICacheService cacheService)
 	{
@@ -21,10 +22,11 @@ public class FilmsRepository : IFilmsRepository
 	
 	
 	
-	public async Task<List<Film>> GetAll(FilmsIncludeOptions includeOptions = FilmsIncludeOptions.None) 
+	public async Task<List<Film>> GetAll(
+		string? title, FilmsIncludeOptions includeOptions)
 	{
-		string key = $"all-films-include-{(int)includeOptions}";
-		
+		string key = $"all-films-include-{(int)includeOptions}-title-{title}";
+
 		List<Film>? cachedFilms = await _cacheService.GetAsync<List<Film>>(key);
 		
 		if (cachedFilms is not null)
@@ -34,6 +36,9 @@ public class FilmsRepository : IFilmsRepository
 		IQueryable<FilmEntity> filmsQuery= _dbContext
 			.Films
 			.AsNoTracking();
+
+		if (title is not null)
+			filmsQuery = filmsQuery.Where(f => f.Title.ToLower().Contains(title.ToLower()));
 		
 		filmsQuery = ApplyIncludeOptionsToQuery(filmsQuery, includeOptions);
 		
@@ -65,13 +70,18 @@ public class FilmsRepository : IFilmsRepository
 
 			})
 			.ToList();
-		
-		await _cacheService.SetAsync(key, films, _allFilmsCacheDuration);
+
+		if (title is not null) {
+			await _cacheService.SetAsync(key, films, _allFilmsWithTitleCacheDuration);
+		}
+		else {
+			await _cacheService.SetAsync(key, films, _allFilmsCacheDuration);
+		}
 
 		return films;
 	}
 	
-	public async Task<Film> GetById(Guid id, FilmsIncludeOptions includeOptions = FilmsIncludeOptions.None)
+	public async Task<Film> GetById(Guid id, FilmsIncludeOptions includeOptions)
 	{
 		
 		string key = $"{nameof(Film)}-{id}-include-{(int)includeOptions}";
@@ -174,7 +184,7 @@ public class FilmsRepository : IFilmsRepository
 		await _cacheService.RemoveAsync("all-films");
 		foreach (var includeOption in Enum.GetValues<FilmsIncludeOptions>())
 		{
-			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}");
+			await _cacheService.RemoveAsync($"all-films-include-{(int)includeOption}-title-null");
 			await _cacheService.RemoveAsync($"{nameof(Film)}-{id}-include-{(int)includeOption}");
 		}
 	}

@@ -6,8 +6,9 @@ This application allows to browse films, submit ratings and view statistics like
 
 ## Endpoints
 ```
-Get /films                  # Get all films
-Get /films?include=ratings  # Get all films with ratings
+Get /films                  # Get films
+Get /films?include=ratings  # Get films with ratings
+Get /films?title            # Search films by title 
 Get /films/{filmId}         # Get particular film 
 Get /films?include=ratings  # Get film with ratings
 Put /films/{filmId}         # Update film

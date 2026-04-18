@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.Application", "FilmRatings.Application\FilmRatings.Application.csproj", "{9ADB8A58-989F-49EA-8398-29A67941D739}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.App.Tests", "tests\FilmRatings.App.Tests\FilmRatings.App.Tests.csproj", "{34B1A8FF-901D-4673-9DC6-4E4AED06F68B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmRatings.Core.Tests", "tests\FilmRatings.Core.Tests\FilmRatings.Core.Tests.csproj", "{450E63B5-FE48-4E60-A7DA-63EBDE2D7527}"
 EndProject
 Global
@@ -37,10 +35,6 @@ Global
 		{9ADB8A58-989F-49EA-8398-29A67941D739}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9ADB8A58-989F-49EA-8398-29A67941D739}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9ADB8A58-989F-49EA-8398-29A67941D739}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34B1A8FF-901D-4673-9DC6-4E4AED06F68B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34B1A8FF-901D-4673-9DC6-4E4AED06F68B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34B1A8FF-901D-4673-9DC6-4E4AED06F68B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34B1A8FF-901D-4673-9DC6-4E4AED06F68B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{450E63B5-FE48-4E60-A7DA-63EBDE2D7527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{450E63B5-FE48-4E60-A7DA-63EBDE2D7527}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{450E63B5-FE48-4E60-A7DA-63EBDE2D7527}.Release|Any CPU.ActiveCfg = Release|Any CPU
