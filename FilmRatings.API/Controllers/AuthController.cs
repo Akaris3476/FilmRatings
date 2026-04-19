@@ -6,11 +6,11 @@ namespace FilmRatings.Controllers;
 
 [ApiController]
 [Route("auth")]
-public class UsersController  : ControllerBase
+public class AuthController  : ControllerBase
 {
 	private readonly IUsersService _usersService;
 
-	public UsersController(IUsersService usersService)
+	public AuthController(IUsersService usersService)
 	{
 		_usersService = usersService;
 	}

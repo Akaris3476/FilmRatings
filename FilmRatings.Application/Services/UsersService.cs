@@ -53,6 +53,13 @@ public class UsersService : IUsersService
 		
 		return token;
 	}
-	
-	// TODO: GiveAdminRights();
+
+	public async Task<User> ChangeAdminRights(string email, bool isAdmin)
+	{
+		User user = await _usersRepository.GetByEmail(email);
+		user.IsAdmin = isAdmin;
+		
+		return await _usersRepository.UpdateIsAdmin(user);
+		
+	}
 }

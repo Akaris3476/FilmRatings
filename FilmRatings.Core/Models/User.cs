@@ -3,10 +3,10 @@ namespace FilmRatings.Core.Models;
 public class User
 {
 	public Guid Id { get; set; }
-	public string Username { get; private set; }
-	public string Email { get; private set; }
-	
-	public bool IsAdmin { get; private set; }
+	public string Username { get; private set; } = null!;
+	public string Email { get; private set; } = null!;
+
+	public bool IsAdmin { get; set; }
 	public string HashedPassword { get; set; }
 	public List<Rating> Ratings { get; set; } = new List<Rating>();
 	

@@ -11,7 +11,6 @@ public class Rating
 	public Guid? UserId { get; private set; }
 	public string? Username { get; private set; }
 	
-	// TODO: add user owner
 
 	public Rating(Guid id, int value, Guid filmId)
 	{

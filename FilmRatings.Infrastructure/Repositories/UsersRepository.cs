@@ -16,7 +16,7 @@ public class UsersRepository : IUsersRepository
 
 	public async Task<Guid> Add(User user)
 	{
-		var userEntity = new UserEntity()
+		var userEntity = new UserEntity
 		{
 			Email = user.Email,
 			Username = user.Username,
@@ -54,6 +54,18 @@ public class UsersRepository : IUsersRepository
 		var user = new User(userEntity.Id, userEntity.Email,
 			userEntity.Username, userEntity.HashedPassword, userEntity.IsAdmin);
 		
+		
+		return user;
+		
+	}
+
+	public async Task<User> UpdateIsAdmin(User user)
+	{
+		
+		await _dbContext.Users
+			.Where(r => r.Id == user.Id)
+			.ExecuteUpdateAsync(e => e
+				.SetProperty(p => p.IsAdmin, p => user.IsAdmin));
 		
 		return user;
 		

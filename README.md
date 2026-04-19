@@ -21,13 +21,19 @@ Delete /films/{filmId}      # Delete film
 Get /films/{filmId}/ratings                 # Get all ratings for a film
 Get /films/{filmId}/ratings?page            # Specify page
 
+# Adds info about user to rating from JWT
 Post /films/{filmId}/ratings                # Add new rating
+# Only for rating's author or admin
 Put /films/{filmId}/ratings/{ratingId}      # Update Rating
+# Only for rating's author or admin
 Delete /films/{filmId}/ratings/{ratingId}   # Delete Rating
 
 # Authentication
 Post /auth/register
 Post /auth/login
+
+# Users
+Patch /users/{email}     # Update user's admin status
 ```
 
 
