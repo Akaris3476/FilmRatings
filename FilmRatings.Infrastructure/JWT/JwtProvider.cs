@@ -40,4 +40,30 @@ public class JwtProvider : IJwtProvider
 		
 		return tokenValue;
 	}
+
+	public string GenerateRefreshTokenString()
+	{
+		string token = Guid.NewGuid().ToString();
+		return token;
+	}
+	
+	public ClaimsPrincipal RetrieveClaimsFromExpiredToken(string token)
+	{
+		
+		var tokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = false,
+			ValidateAudience = false,
+			ValidateLifetime = false,
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey))
+
+		};
+
+		var tokenHandler = new JwtSecurityTokenHandler();
+    
+		ClaimsPrincipal? claims = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+		return claims;
+	}
 }

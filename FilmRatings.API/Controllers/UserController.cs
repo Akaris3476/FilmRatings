@@ -21,7 +21,7 @@ public class UserController : ControllerBase
 	[HttpPatch("{email}")]
 	public async Task<ActionResult<Guid>> ChangeAdminRights(string email, [FromBody] UserRequest request )
 	{
-		User user = await _usersService.ChangeAdminRights(email, request.isAdmin);
+		User user = await _usersService.ChangeAdminRights(email, request.IsAdmin);
 		return Ok(user.Email);
 	}
 	

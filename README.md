@@ -31,6 +31,8 @@ Delete /films/{filmId}/ratings/{ratingId}   # Delete Rating
 # Authentication
 Post /auth/register
 Post /auth/login
+Post /auth/refresh  
+Post /auth/logout
 
 # Users
 Patch /users/{email}     # Update user's admin status

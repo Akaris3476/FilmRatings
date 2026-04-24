@@ -1,3 +1,3 @@
 namespace FilmRatings.Contracts.Users;
 
-public record UserRequest(bool isAdmin);
+public record UserRequest(bool IsAdmin);

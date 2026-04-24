@@ -43,6 +43,10 @@ builder.Services.AddTransient<IUsersService, UsersService>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+
 builder.Services.AddScoped<ICacheService, CacheService>();
 
 

@@ -10,15 +10,18 @@ public class UsersService : IUsersService
 	private readonly IJwtProvider _jwtProvider;
 	private readonly IUsersRepository _usersRepository;
 	private readonly IPasswordHasher _passwordHasher;
+	private readonly IAuthService _authService;
 
 	public UsersService(
 		IJwtProvider jwtProvider,
 		IUsersRepository usersRepository,
-		IPasswordHasher passwordHasher)
+		IPasswordHasher passwordHasher,
+		IAuthService authService)
 	{
 		_jwtProvider = jwtProvider;
 		_usersRepository = usersRepository;
 		_passwordHasher = passwordHasher;
+		_authService = authService;
 	}
 	
 	public async Task Register(string username, string email, string password)
@@ -40,18 +43,21 @@ public class UsersService : IUsersService
 		
 	}
 
-	public async Task<string> Login(string email, string password)
+	public async Task<(string, string)> Login(string email, string password)
 	{
-		var user = await _usersRepository.GetByEmail(email);
+		User user = await _usersRepository.GetByEmail(email);
 		
-		var result = _passwordHasher.Verify(password, user.HashedPassword);
+		bool result = _passwordHasher.Verify(password, user.HashedPassword);
 		
 		if (!result)
 			throw new ArgumentException("Invalid password");
 		
-		var token = _jwtProvider.GenerateToken(user.Id, user.Username, user.IsAdmin);
+		string token = _jwtProvider.GenerateToken(user.Id, user.Username, user.IsAdmin);
 		
-		return token;
+		string refreshToken = _jwtProvider.GenerateRefreshTokenString();
+		await _authService.SaveRefreshToken(refreshToken, user.Id);
+		
+		return (token, refreshToken);
 	}
 
 	public async Task<User> ChangeAdminRights(string email, bool isAdmin)

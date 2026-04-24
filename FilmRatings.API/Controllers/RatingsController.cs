@@ -14,12 +14,10 @@ namespace FilmRatings.Controllers;
 public class RatingsController : ControllerBase
 {
 	private readonly IRatingsService _ratingsService;
-	private readonly IFilmsService _filmsService;
 
-	public RatingsController(IRatingsService ratingsService, IFilmsService filmsService)
+	public RatingsController(IRatingsService ratingsService)
 	{
 		_ratingsService = ratingsService;
-		_filmsService = filmsService;
 	}
 	
 	

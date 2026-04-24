@@ -26,6 +26,7 @@ public static class ApiExtensions
 					ValidateIssuer = false,
 					ValidateAudience = false,
 					ValidateLifetime = true,
+					ClockSkew = TimeSpan.Zero,
 					ValidateIssuerSigningKey = true,
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
 
@@ -35,7 +36,7 @@ public static class ApiExtensions
 				{
 					OnMessageReceived = context =>
 					{
-						context.Token = context.Request.Cookies["pechenka"];
+						context.Token = context.Request.Cookies["AccessToken"];
 
 						return Task.CompletedTask;
 					}
