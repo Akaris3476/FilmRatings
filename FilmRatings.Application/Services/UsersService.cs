@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FilmRatings.Core.Abstractions.Auth;
 using FilmRatings.Core.Abstractions.Repositories;
 using FilmRatings.Core.Abstractions.Services;
@@ -26,7 +27,11 @@ public class UsersService : IUsersService
 	
 	public async Task Register(string username, string email, string password)
 	{
-
+		string pattern = @"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b";
+		Regex regex = new(pattern, RegexOptions.IgnoreCase);
+		if (!regex.IsMatch(email))
+			    throw new ArgumentException("Please, provide a valid email address");
+		
 		if (password.Length < 6)
 			throw new ArgumentException("Password must be at least 6 characters long");
 		

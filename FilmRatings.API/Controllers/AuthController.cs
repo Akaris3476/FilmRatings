@@ -69,6 +69,13 @@ public class AuthController  : ControllerBase
 				return Unauthorized("Invalid Access Token");
 
 			RefreshToken refreshTokenFromDb = await _authService.GetRefreshToken(refreshToken);
+
+			if (refreshTokenFromDb.UserId != userId)
+			{
+				await _authService.RevokeRefreshTokensFromUser(userId);
+				await _authService.RevokeRefreshTokensFromUser(refreshTokenFromDb.UserId);
+				return Unauthorized("Access token does not correspond to refresh token. All sessions terminated");
+			}
 			
 			if (refreshTokenFromDb.ExpiresOnUtc < DateTime.UtcNow)
 			{
